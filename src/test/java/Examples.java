@@ -2,6 +2,10 @@ import io.reactivex.*;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 /**
  * Created by Michał Szewczyk on 2017-05-03.
  */
@@ -122,5 +126,16 @@ public class Examples {
         value = false;
         maybe = Maybe.create(maybeOnSubscribe);
         Assert.assertNull(maybe.blockingGet());
+    }
+
+    @Test
+    public void sampleFlowableUsage() {
+        //Prepared list of letters
+        List<String> strings = IntStream.rangeClosed('a', 'f').boxed().map(i->String.valueOf((char)i.intValue())).collect(Collectors.toList());
+        //Created flowable of all letters
+        Flowable<String> flowable = Flowable.fromIterable(strings);
+        //Printing all elements
+        String result = flowable.collect(StringBuffer::new, StringBuffer::append).blockingGet().toString();
+        Assert.assertEquals(result, "abcdef");
     }
 }
