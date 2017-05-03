@@ -1,7 +1,4 @@
-import io.reactivex.Flowable;
-import io.reactivex.Maybe;
-import io.reactivex.Observable;
-import io.reactivex.Single;
+import io.reactivex.*;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -62,6 +59,26 @@ public class Examples {
         receivedTest = false;
         Maybe<String> observable = Maybe.just(TEST);
         observable.subscribe(string -> receivedTest = string.equals(TEST));
+        Assert.assertTrue(receivedTest);
+    }
+
+    /**
+     * Completable example
+     * Completable - Either completes or returns an error.
+     * It never return items.
+     * The reactive version of a Runnable..
+     */
+    @Test
+    public void checkIfSubscriberReceivedTestValueFromCompletable() {
+        receivedTest = false;
+        Completable observable = Completable.fromRunnable(() -> {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+        observable.subscribe(() -> receivedTest = true);
         Assert.assertTrue(receivedTest);
     }
 }
