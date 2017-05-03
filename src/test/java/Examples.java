@@ -29,8 +29,8 @@ public class Examples {
     @Test
     public void checkIfSubscriberReceivedTestValueFromFlowable(){
         receivedTest = false;
-        Flowable<String> observable = Flowable.just(TEST);
-        observable.subscribe(string -> receivedTest = string.equals(TEST));
+        Flowable<String> flowable = Flowable.just(TEST);
+        flowable.subscribe(string -> receivedTest = string.equals(TEST));
         Assert.assertTrue(receivedTest);
     }
 
@@ -43,8 +43,8 @@ public class Examples {
     @Test
     public void checkIfSubscriberReceivedTestValueFromSingle() {
         receivedTest = false;
-        Single<String> observable = Single.just(TEST);
-        observable.subscribe(string -> receivedTest = string.equals(TEST));
+        Single<String> single = Single.just(TEST);
+        single.subscribe(string -> receivedTest = string.equals(TEST));
         Assert.assertTrue(receivedTest);
     }
 
@@ -57,8 +57,8 @@ public class Examples {
     @Test
     public void checkIfSubscriberReceivedTestValueFromMaybe() {
         receivedTest = false;
-        Maybe<String> observable = Maybe.just(TEST);
-        observable.subscribe(string -> receivedTest = string.equals(TEST));
+        Maybe<String> maybe = Maybe.just(TEST);
+        maybe.subscribe(string -> receivedTest = string.equals(TEST));
         Assert.assertTrue(receivedTest);
     }
 
@@ -71,14 +71,56 @@ public class Examples {
     @Test
     public void checkIfSubscriberReceivedTestValueFromCompletable() {
         receivedTest = false;
-        Completable observable = Completable.fromRunnable(() -> {
+        Completable compatible = Completable.fromRunnable(() -> {
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         });
-        observable.subscribe(() -> receivedTest = true);
+        compatible.subscribe(() -> receivedTest = true);
         Assert.assertTrue(receivedTest);
+    }
+
+    private Boolean value;
+
+    @Test
+    public void sampleMaybeUsage() {
+        //Prepared MaybeOnSubscribe
+        MaybeOnSubscribe<String> maybeOnSubscribe = emitter -> {
+            if (value == null) {
+                //throw throwable
+                emitter.onError(new IllegalStateException());
+            } else if (value) {
+                //return value
+                emitter.onSuccess(TEST);
+            } else {
+                //return null
+                emitter.onComplete();
+            }
+
+        };
+
+        //onError
+        boolean success = false;
+        Maybe<String> maybe = null;
+        try {
+            maybe = Maybe.create(maybeOnSubscribe);
+            maybe.blockingGet();
+        } catch (Throwable throwable) {
+            success = true;
+        } finally {
+            Assert.assertTrue(success);
+        }
+
+        //onSuccess
+        value = true;
+        maybe = Maybe.create(maybeOnSubscribe);
+        Assert.assertEquals(maybe.blockingGet(), TEST);
+
+        //onError
+        value = false;
+        maybe = Maybe.create(maybeOnSubscribe);
+        Assert.assertNull(maybe.blockingGet());
     }
 }
