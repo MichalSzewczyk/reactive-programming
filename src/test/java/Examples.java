@@ -1,4 +1,5 @@
 import io.reactivex.Flowable;
+import io.reactivex.Maybe;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import org.junit.Assert;
@@ -46,6 +47,20 @@ public class Examples {
     public void checkIfSubscriberReceivedTestValueFromSingle() {
         receivedTest = false;
         Single<String> observable = Single.just(TEST);
+        observable.subscribe(string -> receivedTest = string.equals(TEST));
+        Assert.assertTrue(receivedTest);
+    }
+
+
+    /**
+     * Maybe<T> example
+     * Maybe - Succeeds with an item, or no item, or errors.
+     * The reactive version of an Optional.
+     */
+    @Test
+    public void checkIfSubscriberReceivedTestValueFromMaybe() {
+        receivedTest = false;
+        Maybe<String> observable = Maybe.just(TEST);
         observable.subscribe(string -> receivedTest = string.equals(TEST));
         Assert.assertTrue(receivedTest);
     }
