@@ -61,4 +61,3 @@ hs_err_pid*
 /settings.gradle
 .gradle/
 build/
-src/test/
