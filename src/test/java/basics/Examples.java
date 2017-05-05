@@ -1,6 +1,7 @@
 package basics;
 
 import io.reactivex.*;
+import io.reactivex.flowables.ConnectableFlowable;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -139,5 +140,28 @@ public class Examples {
         //Printing all elements
         String result = flowable.collect(StringBuffer::new, StringBuffer::append).blockingGet().toString();
         Assert.assertEquals(result, "abcdef");
+    }
+
+    private int oddCounter;
+    private int evenCounter;
+    private int allCounter;
+
+    @Test
+    public void doubleSubscriptionInSameStream() {
+        Flowable<Integer> source = Flowable.range(1, 5);
+
+        ConnectableFlowable<Integer> cf = source.publish();
+        cf.doOnEach(e -> allCounter++).subscribe();
+
+
+        Flowable<Integer> even = cf.filter(v -> v % 2 == 0);
+        Flowable<Integer> odd = cf.filter(v -> v % 2 != 0);
+
+        odd.doOnEach(e -> oddCounter++).subscribe();
+        even.doOnEach(e -> evenCounter++).subscribe();
+
+        cf.connect();
+
+        Assert.assertEquals(oddCounter + evenCounter, allCounter);
     }
 }
